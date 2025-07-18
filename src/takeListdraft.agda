@@ -72,10 +72,9 @@ lengthxs : {A : Set} {n : ℕ} (x : A) (xs : List A) → ((suc n) ≡ length (x 
 lengthxs {A} {n} x xs sucn=len = cong pred sucn=len
 
 -- Take++₁ : When you append 2 lists together and then take more than the length of the first list, you get the first list back and some of the second list
-take-++₁ : {A : Set} {n i : ℕ} (xs ys : List A) → (n ≡ length xs) → take (n + i) (xs ++ ys) ≡ xs ++ take i ys
-take-++₁ {A} {n = zero} {i} [] ys n=len = refl
-take-++₁ {A} {n = suc n} {i} (x ∷ xs) ys sucn=len = cong (x ∷_) (take-++₁ xs ys (lengthxs x xs sucn=len))
-
+take-++₁ : {A : Set} {n : ℕ} (xs ys : List A) → (n ≡ length xs) → (i : ℕ) → (p : n ≤ i) → take (i) (xs ++ ys) ≡ xs ++ take (i ∸ n) ys
+take-++₁ {n = zero} [] ys n=len i p = refl
+take-++₁ {n = suc n} (x ∷ xs) ys sucn=len (suc i) p = cong (x ∷_) (take-++₁ xs ys (lengthxs x xs sucn=len) i (s≤s⁻¹ p))
 
 
 
