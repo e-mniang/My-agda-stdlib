@@ -66,22 +66,15 @@ take-++ zero xs ys n≤len = refl
 take-++ (suc n) [] ys () 
 take-++ (suc n) (x ∷ xs) ys (s≤s n≤len) = cong (x ∷_) (take-++ n xs ys n≤len)
 
--- Take++₁ : When you append 2 lists together and then take more than the length of the first list, you get the first list back and some of the second list
+
 -- lemma : 
 lengthxs : {A : Set} {n : ℕ} (x : A) (xs : List A) → ((suc n) ≡ length (x ∷ xs)) → (n ≡ length xs)
 lengthxs {A} {n} x xs sucn=len = cong pred sucn=len
 
+-- Take++₁ : When you append 2 lists together and then take more than the length of the first list, you get the first list back and some of the second list
 take-++₁ : {A : Set} {n i : ℕ} (xs ys : List A) → (n ≡ length xs) → take (n + i) (xs ++ ys) ≡ xs ++ take i ys
 take-++₁ {A} {n = zero} {i} [] ys n=len = refl
 take-++₁ {A} {n = suc n} {i} (x ∷ xs) ys sucn=len = cong (x ∷_) (take-++₁ xs ys (lengthxs x xs sucn=len))
-
-{- 
-take : ℕ → List A → List A
-take zero    xs       = []
-take (suc n) []       = []
-take (suc n) (x ∷ xs) = x ∷ take n xs
--}
-
 
 
 
