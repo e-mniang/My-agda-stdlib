@@ -8,46 +8,42 @@
 
 module Effect.Monad.Partial where
 
-open import Level using (Level; suc; zero;_⊔_)
+open import Level using (Level; _⊔_; suc)
 open import Data.Product using (_×_; Σ; Σ-syntax; _,_)
-open import Data.Empty using (⊥-elim; ⊥)
-open import Data.Unit using (⊤)
+open import Data.Empty.Polymorphic using (⊥; ⊥-elim)
+open import Data.Unit.Polymorphic  using (⊤)
 
 private
   variable
-    a b ω ℓ' ℓ : Level
+    a ℓ ℓ' : Level
     A B : Set a
 
 ------------------------------------------------------------------------
 -- The partial monad
 
-record ↯ {a} (A : Set a) : Set ω where
+record ↯ (A : Set a) (ℓ : Level) : Set (a ⊔ suc ℓ) where
   field
-    Dom : Set ℓ
-    elt : Dom → A
+    dom : Set ℓ
+    l : dom → A
 
 open ↯
 
+always : A → ↯ A ℓ
+always {ℓ = ℓ} a .dom   = ⊤ {ℓ = ℓ}
+always a .l _         = a
 
-never : ↯ A zero
-never .Dom = ⊥
-never .elt = ⊥-elim
-
-always : A → ↯ A zero
-always a .Dom = ⊤
-always a .elt _ = a
-
-{-
-↯-bind : ↯ A ℓ → (A → ↯ B ℓ') → ↯ B (ℓ ⊔ ℓ')
-↯-bind a↯ f .Dom = Σ[ a↓ ∈ a↯ .Dom ] f (a↯ .elt a↓) .Dom
-↯-bind a↯ f .elt (a↓ , fa↓) = f (a↯ .elt a↓) .elt fa↓
+never : ↯ A ℓ
+never {ℓ = ℓ} .dom = ⊥ {ℓ = ℓ}
+never .l         = ⊥-elim
 
 ↯-map : (A → B) → ↯ A ℓ → ↯ B ℓ
-↯-map f a↯ .Dom = a↯ .Dom
-↯-map f a↯ .elt d = f (a↯ .elt d)
+↯-map f x .dom   = x .dom
+↯-map f x .l d = f (x .l d)
+
+↯-bind : ↯ A ℓ → (A → ↯ B ℓ') → ↯ B (ℓ ⊔ ℓ')
+↯-bind x f .dom            = Σ[ d ∈ x .dom ] (f (x .l d)) .dom
+↯-bind x f .l (dx , dfx) = (f (x .l dx)) .l dfx
 
 ↯-ap : ↯ (A → B) ℓ → ↯ A ℓ' → ↯ B (ℓ ⊔ ℓ')
-↯-ap a→b↯ a↯ .Dom = a→b↯ .Dom × a↯ .Dom
-↯-ap a→b↯ a↯ .elt (f↓ , a↓) = a→b↯ .elt f↓ (a↯ .elt a↓)
--}
-
+↯-ap ff xx .dom            = ff .dom × xx .dom
+↯-ap ff xx .l (df , dx)  = ff .l df (xx .l dx)
